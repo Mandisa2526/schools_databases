@@ -5,13 +5,12 @@ name: Node.js CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     strategy:
@@ -19,22 +18,12 @@ jobs:
         node-version: [14.x, 16.x, 18.x]
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
-    steps:
-    - uses: actions/checkout@v4
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v3
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'npm'
-    - run: npm ci
-    - run: npm run build --if-present
-    - run: npm test
     services:
       postgresql:
         image: postgres:latest
         env:
-          POSTGRES_USER: school-db_owner
-          POSTGRES_PASSWORD: eORVy8X4Pvxq 
+          POSTGRES_USER: school_db_owner
+          POSTGRES_PASSWORD: eORVy8X4Pvxq
           POSTGRES_DB: schools_db
         ports:
           - 5432:5432
@@ -43,14 +32,36 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-      steps:
-       - uses: actions/checkout@v4
-       - name: Install dependencies
-      run: npm install
-       - name: create postgreSQL tables
-         run: PGPASSWORD= eORVy8X4Pvxq psql -h localhost -U school-db_owner -d schools-db -a -f ./scripts.sql    
-       - name: run tests with PostgreSQL
-  run: npm test
-  env:
-    DB_URL: postgresql://school-db_owner:eORVy8X4Pvxq@ep-noisy-haze-a5e69wji.us-east-2.aws.neon.tech/scchools-db?sslmode=require
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - run: npm ci
+
+      - run: npm run build --if-present
+
+      - name: Wait for PostgreSQL to be ready
+        run: |
+          until pg_isready -h localhost -p 5432; do
+            echo waiting for database;
+            sleep 1;
+          done
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Create PostgreSQL tables
+        run: PGPASSWORD=eORVy8X4Pvxq psql -h localhost -U school_db_owner -d schools_db -a -f ./scripts.sql
+
+      - name: Run tests with PostgreSQL
+        env:
+          DB_URL: postgresql://school_db_owner:eORVy8X4Pvxq@localhost:5432/schools_db
+        run: npm test
+
           
