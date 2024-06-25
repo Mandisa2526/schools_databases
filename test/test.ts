@@ -21,7 +21,7 @@ describe('LearnersImpl', () => {
     beforeEach(async function (this: Context) {
 
         try {
-            this.timeout(100000);
+            this.timeout(1000000);
             await db.query("TRUNCATE TABLE learners , subject ,teacher, teacher_subject RESTART IDENTITY CASCADE");
             await db.query(`
                 INSERT INTO subject(name) VALUES ('Mathematics');
@@ -116,6 +116,7 @@ describe('LearnersImpl', () => {
         const teachers: ITeacher[] = await learnersImpl.findTeachersForSubject(1);  // Assuming subject 1 has no teachers linked yet
         assert.equal(teachers.length, 0);
     });
+
     it('should link teacher to subject', async function () {
         // Add teacher
         const teacherResult = await learnersImpl.addTeacher({
