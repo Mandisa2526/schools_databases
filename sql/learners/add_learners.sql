@@ -5,4 +5,3 @@ insert into learners (learner) values (ROW('Sibani', 'Makhumabo', 'sibani@khumal
 insert into learners (learner) values (ROW('Lindiwe', 'Mnyeni', 'lindiwe@email.com')::learner_type);
 INSERT INTO learners (learner) VALUES (ROW('John', 'Doe', 'john.doe@example.com')::learner_type);
 INSERT INTO learners (learner) VALUES (ROW('Jane', 'Smith', 'jane.smith@example.com')::learner_type);
-
